@@ -41,15 +41,25 @@ function doGet() {
   return jsonResponse_({ ok: true, message: "SSRE enquiry endpoint is running." });
 }
 
+function parseBody_(e) {
+  if (e && e.postData && e.postData.contents) {
+    return JSON.parse(e.postData.contents);
+  }
+  if (e && e.parameter && e.parameter.data) {
+    return JSON.parse(e.parameter.data);
+  }
+  throw new Error("Missing POST body");
+}
+
 function doPost(e) {
   try {
     setupSheet();
 
-    if (!e || !e.postData || !e.postData.contents) {
-      return jsonResponse_({ ok: false, error: "Missing POST body" });
+    if (!e) {
+      return jsonResponse_({ ok: false, error: "Missing request" });
     }
 
-    const data = JSON.parse(e.postData.contents);
+    const data = parseBody_(e);
 
     if (FORM_SECRET && data.secret !== FORM_SECRET) {
       return jsonResponse_({ ok: false, error: "Unauthorized" });

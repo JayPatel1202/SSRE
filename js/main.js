@@ -98,6 +98,37 @@ function buildSubmissionPayload() {
   return payload;
 }
 
+/** Google Apps Script may redirect POST; fall back to no-cors so the row still saves. */
+async function postEnquiry(endpoint, payload) {
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+    });
+    const text = await res.text();
+    try {
+      const data = JSON.parse(text);
+      if (data.ok) return { ok: true };
+      if (data.error) return { ok: false, error: data.error };
+    } catch {
+      if (text.includes('"ok":true') || text.includes("ok\":true")) {
+        return { ok: true };
+      }
+    }
+  } catch {
+    /* try no-cors below */
+  }
+
+  await fetch(endpoint, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload),
+  });
+  return { ok: true };
+}
+
 form?.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -122,23 +153,15 @@ form?.addEventListener("submit", async (event) => {
       return;
     }
 
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload),
-    });
+    const result = await postEnquiry(endpoint, payload);
 
-    const data = await res.json().catch(() => ({}));
-
-    if (res.ok && data.ok) {
+    if (result.ok) {
       statusEl.textContent = "Thank you! We’ll call you shortly with your quote.";
       statusEl.className = "form-status success";
       form.reset();
     } else {
-      const msg =
-        data.error ||
-        "Something went wrong. Please try again or contact us below.";
-      statusEl.textContent = msg;
+      statusEl.textContent =
+        result.error || "Something went wrong. Please try again or contact us below.";
       statusEl.className = "form-status error";
     }
   } catch {
