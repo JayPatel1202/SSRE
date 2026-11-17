@@ -9,7 +9,7 @@ const SHEET_NAME = "Enquiries";
 const FOLDER_NAME = "SSRE Bill Uploads";
 
 /** Must match FORM_SECRET in js/config.js (empty = no check) */
-const FORM_SECRET = "SSRE_12022002";
+const FORM_SECRET = "";
 
 function setupSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
