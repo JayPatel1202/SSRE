@@ -1,6 +1,7 @@
 /**
- * Google Apps Script Web App (form → Sheet + Drive).
- * FORM_SECRET must match google-apps-script/Code.gs in your deployed script.
+ * Google Apps Script Web App — enquiries → Google Sheet.
+ * Deployment ID: AKfycbz_Bb6W2zjMkCvLmRdsYmN59z07o1scyV-1vSM98ANRDAqKw5lxheEfvSzEyuMcZFZk
+ * FORM_SECRET must match the same value in your deployed Apps Script project.
  */
 window.SSRE_CONFIG = {
   GOOGLE_SCRIPT_URL:

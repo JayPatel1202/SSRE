@@ -70,7 +70,7 @@
               becomes an asset, not a burden.
             </p>
             <div class="hero-actions">
-              <a href="#enquiry" class="btn btn-primary">Submit bill &amp; get quote</a>
+              <a href="#enquiry" class="btn btn-primary">Get free quote</a>
               <a href="#quote" class="btn btn-ghost">View packages</a>
               <a href="#contact" class="btn btn-call">Contact us</a>
             </div>
@@ -196,7 +196,7 @@
           <div class="benefits-grid">
             <article class="benefit-card reveal">
               <h3>Bill-led sizing</h3>
-              <p>Share your latest electricity bills — we right-size the system for real savings, not overselling.</p>
+              <p>Share your average electricity bill — we right-size the system for real savings, not overselling.</p>
             </article>
             <article class="benefit-card reveal reveal-delay">
               <h3>Smart monitoring</h3>
@@ -221,7 +221,7 @@
             <li class="reveal">
               <span class="step-num">01</span>
               <h3>Share your details</h3>
-              <p>Name, phone, and current month or last two months’ light bill.</p>
+              <p>Name, phone, and optional average bill amount.</p>
             </li>
             <li class="reveal reveal-delay">
               <span class="step-num">02</span>
@@ -244,7 +244,7 @@
               <span class="badge badge-light">Free assessment</span>
               <h2>Submit your enquiry</h2>
               <p>
-                Upload your electricity bill(s) and contact details. We’ll reach out with a personalised
+                Share contact details and, if you know it, your average monthly bill (optional). We’ll reach out with a personalised
                 quotation — choose 2.16 kW, 3.24 kW, or 4.32 kW with applicable govt. subsidy, or ask for
                 <strong>customisation as per your need</strong>.
               </p>
@@ -283,40 +283,17 @@
               />
             </div>
 
-            <fieldset class="field">
-              <legend>Electricity bill period <span class="req">*</span></legend>
-              <div class="radio-group">
-                <label class="radio-pill">
-                  <input type="radio" name="bill_period" value="current_month" required />
-                  <span>Current month bill</span>
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="bill_period" value="last_two_months" />
-                  <span>Last 2 months</span>
-                </label>
-              </div>
-            </fieldset>
-
             <div class="field">
-              <label for="bill_current">Upload bill — current month</label>
+              <label for="average_bill">Average monthly electricity bill (₹) <span class="optional">(optional)</span></label>
               <input
-                type="file"
-                id="bill_current"
-                name="bill_current_month"
-                accept="image/*,.pdf"
-                required
+                type="text"
+                id="average_bill"
+                name="average_bill"
+                inputmode="decimal"
+                placeholder="e.g. 2,500"
+                autocomplete="off"
               />
-              <p class="hint">Photo or PDF of your latest bill (max 8 MB).</p>
-            </div>
-
-            <div class="field is-hidden" id="bill-second-wrap">
-              <label for="bill_previous">Upload bill — previous month <span class="optional">(if 2 months)</span></label>
-              <input
-                type="file"
-                id="bill_previous"
-                name="bill_previous_month"
-                accept="image/*,.pdf"
-              />
+              <p class="hint">Your usual current bill amount helps us recommend the right kW package.</p>
             </div>
 
             <div class="field">

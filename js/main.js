@@ -3,31 +3,10 @@ const config = window.SSRE_CONFIG || {};
 const form = document.getElementById("enquiry-form");
 const statusEl = document.getElementById("form-status");
 const submitBtn = document.getElementById("submit-btn");
-const billSecondWrap = document.getElementById("bill-second-wrap");
-const billCurrent = document.getElementById("bill_current");
-const billPrevious = document.getElementById("bill_previous");
-const billPeriodRadios = form?.querySelectorAll('input[name="bill_period"]');
 
 function getSheetEndpoint() {
   return (config.GOOGLE_SCRIPT_URL || "").trim();
 }
-
-function updateBillFields() {
-  const selected = form?.querySelector('input[name="bill_period"]:checked');
-  const twoMonths = selected?.value === "last_two_months";
-  if (billSecondWrap) {
-    billSecondWrap.classList.toggle("is-hidden", !twoMonths);
-  }
-  if (billPrevious) {
-    billPrevious.required = Boolean(twoMonths);
-    if (!twoMonths) billPrevious.value = "";
-  }
-}
-
-billPeriodRadios?.forEach((radio) => {
-  radio.addEventListener("change", updateBillFields);
-});
-updateBillFields();
 
 /* Back to top (hash links fail when #top was on sticky header) */
 function scrollToPageTop(event) {
@@ -95,67 +74,20 @@ if (prefersReducedMotion) {
   revealEls.forEach((el) => observer.observe(el));
 }
 
-/** Apps Script works reliably with ~8 MB per file */
-const MAX_FILE_BYTES = 8 * 1024 * 1024;
-
-function validateFiles() {
-  for (const input of [billCurrent, billPrevious]) {
-    if (!input?.files?.length) continue;
-    const file = input.files[0];
-    if (file.size > MAX_FILE_BYTES) {
-      return `“${file.name}” is too large. Please use files under 8 MB.`;
-    }
-  }
-  return null;
-}
-
-function readFileAsPayload(file) {
-  if (!file) return Promise.resolve(null);
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result;
-      const base64 =
-        typeof dataUrl === "string" && dataUrl.includes(",")
-          ? dataUrl.split(",")[1]
-          : "";
-      resolve({
-        name: file.name,
-        mimeType: file.type || "application/octet-stream",
-        base64,
-      });
-    };
-    reader.onerror = () => reject(new Error("Could not read file"));
-    reader.readAsDataURL(file);
-  });
-}
-
-async function buildSubmissionPayload() {
+function buildSubmissionPayload() {
   const fd = new FormData(form);
   const gotcha = fd.get("_gotcha");
   if (gotcha) {
     return { honeypot: true };
   }
 
-  const billPeriod = fd.get("bill_period");
-  const currentFile = billCurrent?.files?.[0];
-  const previousFile =
-    billPeriod === "last_two_months" ? billPrevious?.files?.[0] : null;
-
-  const [bill_current, bill_previous] = await Promise.all([
-    readFileAsPayload(currentFile),
-    readFileAsPayload(previousFile),
-  ]);
-
   const payload = {
     name: String(fd.get("name") || "").trim(),
     phone: String(fd.get("phone") || "").trim(),
-    bill_period: billPeriod,
+    average_bill: String(fd.get("average_bill") || "").trim(),
     solar_capacity: String(fd.get("solar_capacity") || "").trim(),
     message: String(fd.get("message") || "").trim(),
     page_url: window.location.href,
-    bill_current,
-    bill_previous,
   };
 
   const secret = (config.FORM_SECRET || "").trim();
@@ -177,45 +109,16 @@ form?.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (!billCurrent?.files?.length) {
-    statusEl.textContent = "Please upload your current month electricity bill.";
-    statusEl.className = "form-status error";
-    billCurrent?.focus();
-    return;
-  }
-
-  const selected = form.querySelector('input[name="bill_period"]:checked');
-  if (!selected) {
-    statusEl.textContent = "Please select which electricity bill period you are sharing.";
-    statusEl.className = "form-status error";
-    return;
-  }
-
-  if (selected.value === "last_two_months" && !billPrevious?.files?.length) {
-    statusEl.textContent = "Please upload both months’ bills.";
-    statusEl.className = "form-status error";
-    billPrevious?.focus();
-    return;
-  }
-
-  const fileError = validateFiles();
-  if (fileError) {
-    statusEl.textContent = fileError;
-    statusEl.className = "form-status error";
-    return;
-  }
-
   submitBtn.disabled = true;
   statusEl.textContent = "Sending your enquiry…";
   statusEl.className = "form-status";
 
   try {
-    const payload = await buildSubmissionPayload();
+    const payload = buildSubmissionPayload();
     if (payload.honeypot) {
       statusEl.textContent = "Thank you! We’ll call you shortly with your quote.";
       statusEl.className = "form-status success";
       form.reset();
-      updateBillFields();
       return;
     }
 
@@ -231,7 +134,6 @@ form?.addEventListener("submit", async (event) => {
       statusEl.textContent = "Thank you! We’ll call you shortly with your quote.";
       statusEl.className = "form-status success";
       form.reset();
-      updateBillFields();
     } else {
       const msg =
         data.error ||

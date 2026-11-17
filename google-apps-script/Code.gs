@@ -1,15 +1,14 @@
 /**
- * Surya Shakti Solar — website enquiries → Google Sheet + Google Drive
+ * Surya Shakti Solar — website enquiries → Google Sheet
  *
  * Setup: open your Google Sheet → Extensions → Apps Script → paste this file.
  * Run setupSheet once, deploy as Web app (see README / SETUP-GOOGLE-SHEET.md).
  */
 
 const SHEET_NAME = "Enquiries";
-const FOLDER_NAME = "SSRE Bill Uploads";
 
-/** Must match FORM_SECRET in js/config.js (empty = no check) */
-const FORM_SECRET = "";
+/** Must match FORM_SECRET in js/config.js */
+const FORM_SECRET = "SSRE_12022002";
 
 function setupSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -22,38 +21,14 @@ function setupSheet() {
       "Submitted At",
       "Name",
       "Phone",
-      "Bill Period",
+      "Average Bill (₹)",
       "Solar Capacity",
       "Notes",
-      "Bill Current (Link)",
-      "Bill Previous (Link)",
       "Page URL",
     ]);
-    sheet.getRange(1, 1, 1, 9).setFontWeight("bold");
+    sheet.getRange(1, 1, 1, 7).setFontWeight("bold");
     sheet.setFrozenRows(1);
   }
-}
-
-function getOrCreateFolder_() {
-  const folders = DriveApp.getFoldersByName(FOLDER_NAME);
-  if (folders.hasNext()) {
-    return folders.next();
-  }
-  return DriveApp.createFolder(FOLDER_NAME);
-}
-
-function saveFile_(fileObj, fallbackName) {
-  if (!fileObj || !fileObj.base64) {
-    return "";
-  }
-  const bytes = Utilities.base64Decode(fileObj.base64);
-  const name = fileObj.name || fallbackName;
-  const mime = fileObj.mimeType || "application/octet-stream";
-  const blob = Utilities.newBlob(bytes, mime, name);
-  const folder = getOrCreateFolder_();
-  const file = folder.createFile(blob);
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  return file.getUrl();
 }
 
 function jsonResponse_(obj) {
@@ -85,21 +60,18 @@ function doPost(e) {
     }
 
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-    const billPeriod =
-      data.bill_period === "last_two_months" ? "Last 2 months" : "Current month";
-
-    const billCurrentLink = saveFile_(data.bill_current, "bill-current");
-    const billPreviousLink = saveFile_(data.bill_previous, "bill-previous");
+    const averageBill =
+      data.average_bill ||
+      data.bill_amount_current ||
+      "";
 
     sheet.appendRow([
       new Date(),
       data.name || "",
       data.phone || "",
-      billPeriod,
+      averageBill,
       data.solar_capacity || "",
       data.message || "",
-      billCurrentLink,
-      billPreviousLink,
       data.page_url || "",
     ]);
 

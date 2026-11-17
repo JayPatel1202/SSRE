@@ -6,7 +6,7 @@ Marketing site for **Surya Shakti Solar Renewable Energy (SSRE)**, Tarapur. Buil
 
 - Hero, featured **₹1.58 L / 3.24 kW** quotation (Adani/Waaree, Polycab inverter & cables)
 - Warranties: **8 yr** Polycab inverter, **30 yr** panel performance, **5 yr** free service
-- Enquiry form → **Google Sheet** (+ bill files in Google Drive)
+- Enquiry form → **Google Sheet** (name, phone, optional average bill)
 - Contact: Jay Patel **8866551202**
 - Uses your `Symbol.jpeg` logo
 
